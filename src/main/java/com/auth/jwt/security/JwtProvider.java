@@ -2,8 +2,10 @@ package com.auth.jwt.security;
 
 
 import com.auth.jwt.model.AuthUser;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import com.auth.jwt.dto.RequestDto;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,9 @@ import java.util.Map;
 public class JwtProvider {
 
     private Key secret;
+
+    @Autowired
+    private RouteValidator routeValidator;
 
     @PostConstruct
     protected void init(){
@@ -68,5 +73,29 @@ public class JwtProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean validate(String token, RequestDto requestDto) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(secret)
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (Exception e) {
+            return false;
+        }
+        if (!isAdmin(token) && routeValidator.isAdmin(requestDto)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isAdmin(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secret)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("role", String.class).equals("admin");
     }
 }
