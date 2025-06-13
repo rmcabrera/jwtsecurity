@@ -2,6 +2,7 @@ package com.auth.jwt.service;
 
 import com.auth.jwt.dto.AuthUserDto;
 import com.auth.jwt.dto.NewUserDto;
+import com.auth.jwt.dto.RequestDto;
 import com.auth.jwt.dto.TokenDto;
 import com.auth.jwt.model.AuthUser;
 import com.auth.jwt.repository.AuthUserRepository;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class AuthService implements UserDetailsService {
+public class AuthService  {
 
     @Autowired
     private AuthUserRepository authUserRepository;
@@ -54,21 +55,11 @@ public class AuthService implements UserDetailsService {
         return null; 
     }
 
-    public TokenDto validate(String token) {
-        if (jwtProvider.validate(token)) {
+    public TokenDto validate(String token, RequestDto requestDto) {
+        if (jwtProvider.validate(token,requestDto)) {
             return new TokenDto(token);
         }
         return null;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AuthUser authUser = authUserRepository.findByUserName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(authUser.getUserName())
-                .password(authUser.getPassword())
-                .roles(authUser.getRole())
-                .build();
-    }
 }

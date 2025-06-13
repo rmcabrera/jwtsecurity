@@ -7,12 +7,10 @@ import com.auth.jwt.dto.TokenDto;
 import com.auth.jwt.model.AuthUser; 
 import com.auth.jwt.service.AuthService; import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -37,8 +35,8 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<TokenDto> validate(@RequestParam String token) {
-        TokenDto tokenDto = authService.validate(token);
+    public ResponseEntity<TokenDto> validate(@RequestParam String token, @RequestBody RequestDto requestDto) {
+        TokenDto tokenDto = authService.validate(token, requestDto);
         if (tokenDto == null) {
             return ResponseEntity.badRequest().build();
         }
